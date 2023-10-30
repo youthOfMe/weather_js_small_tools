@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+        input {
+            width: 300px;
+            height: 30px;
+        }
+        button {
+            width: 100px;
+            height: 36px;
+            background-color: black;
+            color: white;
+        }
+        .one {
+            vertical-align: middle;
+        }
+        #two {
+            width: 410px;
+            height: 400px;
+            background-color: black;
+            margin-top: 10px;
+            box-sizing: border-box;
+            padding: 20px 10px;
+            position: relative;
+        }
+        .title {
+            color: white;
+            font-size: 26px;
+            line-height: 26px;
+        }
+        #info,.status {
+            color: white;
+            margin-top: 20px;
+           
+        }
+        #idea {
+            position: absolute;
+            bottom: 20px;
+            color: white;
+        }
+        #three {
+            width: 410px;
+            height: 50px;
+            box-sizing: border-box;
+            background-color: black;
+            color: white;
+            padding: 10px;
+            margin-top: 1px;
+        }
+    </style>
+</head>
+<body>
+    <div class="one">
+        <input type="text" placeholder="请输入你想查询的城市">
+        <button>立即查询</button>
+    </div>
+    <div id="two">
+        <p class="title">牛马天气查询系统为您竭诚服务</p>
+        <P class="status">查询状态：</P>
+        <p id="info">请输入你想查询的城市</p>
+        <p id="idea">小贴士：</p>
+    </div>
+    <div id="three">
+        <p id="temp">宜居度：</p>
+    </div>
+    
+    <script>
+        var info=document.getElementById("info");
+        var button=document.getElementsByTagName("button")[0];
+        var input=document.getElementsByTagName("input")[0];
+        var state=document.getElementsByClassName("status")[0];
+        var idea=document.getElementById("idea");
+        var temp=document.getElementById("temp")
+        console.log(state)
+        button.onclick=function(){
+            info.innerText="正在查询中...";
+            state.innerText="查询状态：";
+            idea.innerHTML="小贴士："
+            temp.innerHTML="宜居度："
+            setTimeout(function(){
+                var request=new XMLHttpRequest();
+                request.open("post","https://restapi.amap.com/v3/weather/weatherInfo",true);
+                request.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+                request.send("key=0d1a683a9b1162ec05d8af92d656da87&city="+input.value+"&extensions=all")
+                request.onreadystatechange=function(){
+                console.log(123)
+                if(request.readyState===4&&request.status===200){
+                    var data=request.responseText;
+                    var datac=JSON.parse(data)
+                    console.log(datac)
+                    if(Number(datac.count)===1&&Number(datac.status)===1){
+                        
+                        info.innerText=""
+                        state.innerText="查询状态：查询成功";
+                        var province=datac.forecasts[0].province;
+                        console.log(province)
+                        var city=datac.forecasts[0].city;
+                        var more=datac.forecasts[0].casts;
+                        console.log(more)
+                       
+                        var result=""
+                        for(var i=0;i<more.length;i++){
+                            console.log(1)
+                            result+=(more[i].date+"，星期"+more[i].week+"，白天天气是"+more[i].dayweather+"，白天温度是"+more[i].daytemp+"摄氏度"+"，夜间天气是"+more[i].nightweather+"，夜间温度是"+more[i].nighttemp+"摄氏度。")
+                        }
+                        info.innerText=province+city+result
+                        function weathera(){
+                            for(a=0;a<more[0].dayweather.length;a++){
+                                //if()
+                            }
+                        }
+                        function ideas(){
+                            if(more[0].dayweather==="晴"){
+                                idea.innerText+="晴天，今天的天空像一封深色的情书。"
+                            }else if(more[0].dayweather.indexOf("雨")!==(-1)){
+                                idea.innerText+="雨天，有人等烟雨，有人怪雨急，有人在等伞，有人等雨停，而他/她在等你。无论如何记得带伞。"
+                            }else if(more[0].dayweather.indexOf("阴")!==(-1)){
+                                idea.innerText+="阴天，又如何呢，在骤雨来临之际，我会手捧一束雏菊，在你身后为你撑伞。阴天快乐。"
+                            }else if(more[0].dayweather.indexOf("雪")!==(-1)){
+                                idea.innerText+="写在雪地里的那个人你一定很喜欢吧。"
+                            }
+                        }
+                        function temperature(){
+                            if(more[0].daytemp>=35){
+                                temp.innerText="宜居度：高温预警"
+                            }else if(more[0].daytemp>=20){
+                                temp.innerText="宜居度：适宜户外活动"
+                            }else if(more[0].daytemp>10){
+                                temp.innerText+="宜居度：记得加毛衣，穿秋裤"
+                            }else{
+                                temp.innerText+="宜居度：天气寒冷注意保暖"
+                            }
+                        }
+                        if(more[0].week!==6&&more[0].week!==7){
+                            idea.innerText+="又是一天工作日要工作顺心哦！"
+                            ideas()
+                            temperature()
+                        }else {
+                            idea.innerText+="周末放松一下吧。"
+                            ideas()
+                            temperature()
+                        }
+
+                    }else {
+                        alert("无数据")
+                        info.innerText="请输入你想查询的城市";
+                    }
+                }
+            }
+            },1)
+            
+
+        }
+    </script>
+</body>
+</html>
